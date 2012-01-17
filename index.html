@@ -18,8 +18,7 @@
 //        lastmousey = mousey;
 //      });
         function Vect(x, y){
-            this.x = x;
-            this.y = y;
+            this.setXY(x, y);
         }
         
         Vect.prototype.vadd = function(v1, v2) {
@@ -50,10 +49,10 @@
             
             var measure, move;
             
-            
-            
-            $('#bigbg-wrap').mousedown(function(e){
+            $('#bigbg-viewport').mousedown(function(e){
                 clearInterval(move);
+                
+                oldPosition.setXY(e.pageX, e.pageY);
                 
                 measure = setInterval(function(){
                     speed.vadd(position, oldPosition.negate());
@@ -61,20 +60,18 @@
                 },50);
             });
             
-            $('#bigbg-wrap').mouseup(function(e){
+            $('#bigbg-viewport').mouseup(function(e){
                 clearInterval(measure);
                 
                 move = setInterval(function(){
                     var left = parseInt($('#bigbg').css("left"), 10);
                     var top = parseInt($('#bigbg').css("top"), 10);
-                    $('#bigbg').css({left:(left+speed.x) + "px", top:top+speed.y + "px"})    
-                }, 80)
+                    $('#bigbg').css({left:(left + Math.round(speed.x/10)) + "px", top:(top+Math.round(speed.y/10)) + "px"})    
+                }, 5)
             });
             
-          $('#bigbg-wrap').mousemove(function(e){
-            
+          $('#bigbg-viewport').mousemove(function(e){
             position.setXY(e.pageX, e.pageY);
-            $('#mx').text(speed.x);
           });
         })
       </script>
@@ -83,7 +80,7 @@
     <span id="mx"></span>
     <span id="my"></span>
     <div id="bigbg">
-        <div id="bigbg-wrap"></div>
+        <div id="bigbg-viewport"></div>
     </div>
   </body>
 </html>
