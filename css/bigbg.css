@@ -1,0 +1,44 @@
+body{
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+#bigbg-wrap {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+  top:0;
+  left:0;
+}
+
+#bigbg {
+  position: absolute;
+  width: 3000px;
+  height: 3000px;
+  background: url("../img/pestr.jpg") repeat 0 0 transparent;
+  left:0px;
+  top:0px;
+}
+
+#mx, #my {
+    position: fixed;
+    float: left;
+    display: block;
+    left: 10px;
+    top: 10px;
+    height: 15px;
+    width: 50px;
+    z-index: 1000;
+    background: #000;
+    color:#fff;
+    font-family: sans;
+}
+
+#my {
+    top: 30px;
+}
