@@ -4,86 +4,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link href="./css/bigbg.css" media="all" rel="stylesheet" type="text/css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
-    <script type="text/javascript">
-//      var lastmousex =-1; 
-//      var lastmousey =-1;
-//      var lastmousetime;
-//      var mousetravel = 0;
-//      $('html').mousemove(function(e) {
-//        var mousex = e.pageX;
-//        var mousey = e.pageY;
-//        if (lastmousex > -1)
-//          mousetravel += Math.max( Math.abs(mousex-lastmousex), Math.abs(mousey-lastmousey) );
-//        lastmousex = mousex;
-//        lastmousey = mousey;
-//      });
-        function Vect(x, y){
-            this.x = x;
-            this.y = y;
-        }
-        
-        Vect.prototype.vadd = function(v1, v2) {
-            if((v1 instanceof Vect) && (v2 instanceof Vect)) {
-                this.x = v1.x + v2.x;
-                this.y = v1.y + v2.y;
-            }
-            
-            return this;
-        }
-        
-        Vect.prototype.negate = function() {
-            this.x = (-this.x);
-            this.y = (-this.y);
-            
-            return this;
-        }
-        
-        Vect.prototype.setXY = function(x, y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        $(document).ready(function(){
-            var speed = new Vect(0, 0),
-            oldPosition = new Vect(0, 0),
-            position = new Vect(0, 0);
-            
-            var measure, move;
-            
-            
-            
-            $('#bigbg-wrap').mousedown(function(e){
-                clearInterval(move);
-                
-                measure = setInterval(function(){
-                    speed.vadd(position, oldPosition.negate());
-                    oldPosition.setXY(position.x, position.y);
-                },50);
-            });
-            
-            $('#bigbg-wrap').mouseup(function(e){
-                clearInterval(measure);
-                
-                move = setInterval(function(){
-                    var left = parseInt($('#bigbg').css("left"), 10);
-                    var top = parseInt($('#bigbg').css("top"), 10);
-                    $('#bigbg').css({left:(left+speed.x) + "px", top:top+speed.y + "px"})    
-                }, 80)
-            });
-            
-          $('#bigbg-wrap').mousemove(function(e){
-            
-            position.setXY(e.pageX, e.pageY);
-            $('#mx').text(speed.x);
-          });
-        })
-      </script>
+    <script src="./js/bigbg.js"></script>
   </head>  
   <body>
     <span id="mx"></span>
     <span id="my"></span>
     <div id="bigbg">
-        <div id="bigbg-wrap"></div>
+        <div id="bigbg-viewport"></div>
     </div>
   </body>
 </html>
