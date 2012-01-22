@@ -11,9 +11,14 @@ Vect.prototype.vadd = function(v1, v2) {
             
   return this;
 }
+
+Vect.prototype.scale = function(factor) {
+    this.setXY(this.x * factor, this.y * factor);
+    return this;
+}
         
 Vect.prototype.negate = function() {
-  this.setXY(-this.x, -this.y);          
+  this.scale(-1);          
   return this;
 }
         
@@ -25,7 +30,8 @@ Vect.prototype.setXY = function(x, y) {
 function Movable($el){
     this.el = $el;
     $el.data('movable', this);
-    this.path = []
+    this.path = [];
+    this.speed = new Vect(0, 0);
 }
 
 Movable.prototype.move = function(x, y){
@@ -39,6 +45,21 @@ Movable.prototype.move = function(x, y){
     if(this.path.length > 100) {
         this.path.pop();
     }
+}
+
+Movable.prototype.speedMeasure = function(){
+    var lastPoint,
+    threshhold = 200,
+    deltaTime = 0;
+    for(var l = this.path.length, i = 0; i < l; i++) {
+        deltaTime = this.path[0].tick - this.path[i].tick;
+        if(deltaTime > threshhold) {
+            lastPoint = this.path[i].point;
+            break;
+        }
+    }
+    
+    this.speed.vadd(lastPoint, this.path[0].point.negate).scale(1000/deltaTime);
 }
 
 function Drag($el, startCb, posUpdateCb, stopCb){
