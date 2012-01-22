@@ -6,17 +6,14 @@ function Vect(x, y){
         
 Vect.prototype.vadd = function(v1, v2) {
   if((v1 instanceof Vect) && (v2 instanceof Vect)) {
-    this.x = v1.x + v2.x;
-    this.y = v1.y + v2.y;
+    this.setXY(v1.x + v2.x, v1.y + v2.y)
   }
             
   return this;
 }
         
 Vect.prototype.negate = function() {
-  this.x = (-this.x);
-  this.y = (-this.y);
-            
+  this.setXY(-this.x, -this.y);          
   return this;
 }
         
@@ -28,50 +25,68 @@ Vect.prototype.setXY = function(x, y) {
 function Movable($el){
     this.el = $el;
     $el.data('movable', this);
+    this.path = []
 }
 
 Movable.prototype.move = function(x, y){
-    this.el.offset({left:x, top:y});
+    var left = Math.round(x),
+    top = Math.round(y);
+    this.el.offset({left:left, top:top});
+    this.path.unshift({
+        point: new Vect(left, top), 
+        tick: new Date.getTime()
+    });
+    if(this.path.length > 100) {
+        this.path.pop();
+    }
 }
 
-function Drag($el){
+function Drag($el, startCb, posUpdateCb, stopCb){
     this.active = false;
     this.draggy = new Movable($el);
     this.draggyToMouse = new Vect(0, 0);
+    this.startCb = startCb;
+    this.posUpdateCb = posUpdateCb;
+    this.stopCb = stopCb;
 }
 
 Drag.prototype.start = function(x, y){
     this.active = true;
     this.draggyToMouse.setXY(this.draggy.el.offset().left - x, this.draggy.el.offset().top - y);
+    if(typeof this.startCb === "function") {
+        this.startCb(this);
+    }
 }
 
 Drag.prototype.move = function(x, y){
     if (this.active) {
         this.draggy.move(x + this.draggyToMouse.x, y + this.draggyToMouse.y);
+        if(typeof this.posUpdateCb === "function") {
+            this.posUpdateCb(this);
+        }
     }
 }
 
 Drag.prototype.stop = function(){
     this.active = false;
+    if(typeof this.stopCb === "function" ) {
+        this.stopCb(this);
+    }
 }
 
 $(document).ready(function(){
-  var $bigbg = $('#bigbg');
   
   var speed = new Vect(0, 0),
   oldPos = new Vect(0, 0),
-  pos = new Vect(0, 0),
-  relPos = new Vect(0, 0);
+  pos = new Vect(0, 0);
             
   var measure, move, drag = new Drag($('#bigbg'));
             
   $(document).mousedown(function(e){
-    //TODO: wrap into method with callback as a callback pass drag init which does relPos setting and drag = true
     clearInterval(move);
     
     drag.start(e.pageX, e.pageY)
     
-    //TODO: wrap measure into method which sets old pos and then inits measure intervaled 
     oldPos.setXY(e.pageX, e.pageY);
                 
     measure = setInterval(function(){
