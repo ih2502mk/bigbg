@@ -49,17 +49,17 @@ Movable.prototype.move = function(x, y){
 
 Movable.prototype.speedMeasure = function(){
     var lastPoint,
-    threshhold = 200,
+    threshold = 200,
     deltaTime = 0;
     for(var l = this.path.length, i = 0; i < l; i++) {
         deltaTime = this.path[0].tick - this.path[i].tick;
-        if(deltaTime > threshhold) {
+        if(deltaTime > threshold) {
             lastPoint = this.path[i].point;
             break;
         }
     }
     
-    this.speed.vadd(lastPoint, this.path[0].point.negate).scale(1000/deltaTime);
+    this.speed.vadd(lastPoint, this.path[0].point.negate()).scale(1000/deltaTime);
 }
 
 function Drag($el, startCb, posUpdateCb, stopCb){
