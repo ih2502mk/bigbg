@@ -29,18 +29,16 @@ Vect.prototype.setXY = function(x, y) {
 
 function Movable($el){
     this.el = $el;
-    $el.data('movable', this);
+    //$el.data('movable', this);
     this.path = [];
     this.speed = new Vect(0, 0);
 }
 
 Movable.prototype.move = function(x, y){
-    var left = Math.round(x),
-    top = Math.round(y);
-    this.el.offset({left:left, top:top});
+    this.el.offset({left:x, top:y});
     this.path.unshift({
-        point: new Vect(left, top), 
-        tick: new Date.getTime()
+        point: new Vect(x, y), 
+        tick: new Date().getTime()
     });
     if(this.path.length > 100) {
         this.path.pop();
@@ -49,9 +47,10 @@ Movable.prototype.move = function(x, y){
 
 Movable.prototype.speedMeasure = function(){
     var lastPoint,
-    threshold = 200,
-    deltaTime = 0;
-    for(var l = this.path.length, i = 0; i < l; i++) {
+    threshold = 100,
+    deltaTime = 0,
+    len = this.path.length;
+    for(var i = 0; i < len; i++) {
         deltaTime = this.path[0].tick - this.path[i].tick;
         if(deltaTime > threshold) {
             lastPoint = this.path[i].point;
@@ -59,91 +58,52 @@ Movable.prototype.speedMeasure = function(){
         }
     }
     
-    this.speed.vadd(lastPoint, this.path[0].point.negate()).scale(1000/deltaTime);
+    if(!lastPoint) {
+        lastPoint = this.path[len].point;
+    }
+    else {
+        this.speed.vadd(lastPoint, this.path[0].point.negate()).scale(1000/deltaTime);   
+    }
 }
 
-function Drag($el, startCb, posUpdateCb, stopCb){
+function Drag($el){
     this.active = false;
     this.draggy = new Movable($el);
     this.draggyToMouse = new Vect(0, 0);
-    this.startCb = startCb;
-    this.posUpdateCb = posUpdateCb;
-    this.stopCb = stopCb;
 }
 
 Drag.prototype.start = function(x, y){
     this.active = true;
+    this.draggy.path = [];
     this.draggyToMouse.setXY(this.draggy.el.offset().left - x, this.draggy.el.offset().top - y);
-    if(typeof this.startCb === "function") {
-        this.startCb(this);
-    }
 }
 
 Drag.prototype.move = function(x, y){
     if (this.active) {
         this.draggy.move(x + this.draggyToMouse.x, y + this.draggyToMouse.y);
-        if(typeof this.posUpdateCb === "function") {
-            this.posUpdateCb(this);
-        }
     }
 }
 
 Drag.prototype.stop = function(){
     this.active = false;
-    if(typeof this.stopCb === "function" ) {
-        this.stopCb(this);
-    }
+    this.draggy.speedMeasure();
 }
 
 $(document).ready(function(){
-  
-  var speed = new Vect(0, 0),
-  oldPos = new Vect(0, 0),
-  pos = new Vect(0, 0);
+         
+  var drag = new Drag($('#bigbg'));
             
-  var measure, move, drag = new Drag($('#bigbg'));
-            
-  $(document).mousedown(function(e){
-    clearInterval(move);
-    
-    drag.start(e.pageX, e.pageY)
-    
-    oldPos.setXY(e.pageX, e.pageY);
-                
-    measure = setInterval(function(){
-      speed.vadd(pos, oldPos.negate());
-      oldPos.setXY(pos.x, pos.y);
-    },50);
-    
+  $(document).mousedown(function(e){    
+    drag.start(e.pageX, e.pageY);
   });
             
   $(document).mouseup(function(e){
     drag.stop();
-    
-    clearInterval(measure);
-    
-    //TODO: make this not so crappy
-    var left = drag.draggy.el.offset().left;
-    var top = drag.draggy.el.offset().top;
-    var vx = Math.abs(Math.round(speed.x/5));
-    var vy = Math.abs(Math.round(speed.y/5));
-    var dirx = vx/Math.round(speed.x/5);
-    var diry = vy/Math.round(speed.y/5);
-    move = setInterval(function(){
-      left += --vx*dirx;
-      top += --vy*diry;
-      if (vx && vy) {
-          drag.draggy.move(left, top);
-      }
-      else {
-          clearInterval(move);
-      }    
-    }, 10)
+    $('#mx').text(drag.draggy.speed.x);
+    $('#my').text(drag.draggy.speed.y);
   });
             
   $(document).mousemove(function(e){
-    pos.setXY(e.pageX, e.pageY);
-    
     drag.move(e.pageX, e.pageY);
   });
-})
+});
