@@ -35,7 +35,9 @@ function Movable($el){
 }
 
 Movable.prototype.move = function(x, y){
-    this.el.offset({left:x, top:y});
+    //this.el.offset({left:x, top:y});
+    this.el[0].style.left = x + "px";
+    this.el[0].style.top = y + "px";
     this.path.unshift({
         point: new Vect(x, y), 
         tick: new Date().getTime()
@@ -45,24 +47,28 @@ Movable.prototype.move = function(x, y){
     }
 }
 
-Movable.prototype.speedMeasure = function(){
+Movable.prototype.speedMeasure = function(x, y, stopTime){
     var lastPoint,
     threshold = 100,
     deltaTime = 0,
     len = this.path.length;
-    for(var i = 0; i < len; i++) {
-        deltaTime = this.path[0].tick - this.path[i].tick;
-        if(deltaTime > threshold) {
-            lastPoint = this.path[i].point;
-            break;
+    if(len) {
+        for(var i = 0; i < len; i++) {
+            deltaTime = stopTime - this.path[i].tick;
+            if(deltaTime > threshold) {
+                lastPoint = this.path[i].point;
+                break;
+            }
         }
-    }
-    
-    if(!lastPoint) {
-        lastPoint = this.path[len].point;
+        
+        if(!lastPoint) {
+            lastPoint = this.path[len-1].point;
+        }
+        
+        this.speed.vadd(lastPoint, new Vect(-x, -y)).scale(1000/deltaTime);
     }
     else {
-        this.speed.vadd(lastPoint, this.path[0].point.negate()).scale(1000/deltaTime);   
+        this.speed.setXY(0, 0);
     }
 }
 
@@ -84,9 +90,9 @@ Drag.prototype.move = function(x, y){
     }
 }
 
-Drag.prototype.stop = function(){
+Drag.prototype.stop = function(x, y){
     this.active = false;
-    this.draggy.speedMeasure();
+    this.draggy.speedMeasure(x + this.draggyToMouse.x, y + this.draggyToMouse.y, new Date().getTime());
 }
 
 $(document).ready(function(){
@@ -98,9 +104,7 @@ $(document).ready(function(){
   });
             
   $(document).mouseup(function(e){
-    drag.stop();
-    $('#mx').text(drag.draggy.speed.x);
-    $('#my').text(drag.draggy.speed.y);
+    drag.stop(e.pageX, e.pageY);
   });
             
   $(document).mousemove(function(e){
