@@ -1,7 +1,7 @@
 function Vect(x, y){
-    this.x;
-    this.y;
-    this.setXY(x, y);
+  this.x;
+  this.y;
+  this.setXY(x, y);
 }
         
 Vect.prototype.vadd = function(v1, v2) {
@@ -13,8 +13,8 @@ Vect.prototype.vadd = function(v1, v2) {
 }
 
 Vect.prototype.scale = function(factor) {
-    this.setXY(this.x * factor, this.y * factor);
-    return this;
+  this.setXY(this.x * factor, this.y * factor);
+  return this;
 }
         
 Vect.prototype.negate = function() {
@@ -28,71 +28,71 @@ Vect.prototype.setXY = function(x, y) {
 }
 
 function Movable($el){
-    this.el = $el;
-    //$el.data('movable', this);
-    this.path = [];
-    this.speed = new Vect(0, 0);
+  this.el = $el;
+  //$el.data('movable', this);
+  this.path = [];
+  this.speed = new Vect(0, 0);
 }
 
 Movable.prototype.move = function(x, y){
-    //this.el.offset({left:x, top:y});
-    this.el[0].style.left = x + "px";
-    this.el[0].style.top = y + "px";
-    this.path.unshift({
-        point: new Vect(x, y), 
-        tick: new Date().getTime()
-    });
-    if(this.path.length > 100) {
-        this.path.pop();
-    }
+  //this.el.offset({left:x, top:y});
+  this.el[0].style.left = x + "px";
+  this.el[0].style.top = y + "px";
+  this.path.unshift({
+    point: new Vect(x, y), 
+    tick: new Date().getTime()
+  });
+  if(this.path.length > 100) {
+    this.path.pop();
+  }
 }
 
 Movable.prototype.speedMeasure = function(x, y, stopTime){
-    var lastPoint,
-    threshold = 100,
-    deltaTime = 0,
-    len = this.path.length;
-    if(len) {
-        for(var i = 0; i < len; i++) {
-            deltaTime = stopTime - this.path[i].tick;
-            if(deltaTime > threshold) {
-                lastPoint = this.path[i].point;
-                break;
-            }
-        }
-        
-        if(!lastPoint) {
-            lastPoint = this.path[len-1].point;
-        }
-        
-        this.speed.vadd(lastPoint, new Vect(-x, -y)).scale(1000/deltaTime);
+  var lastPoint,
+  threshold = 100,
+  deltaTime = 0,
+  len = this.path.length;
+  if(len) {
+    for(var i = 0; i < len; i++) {
+      deltaTime = stopTime - this.path[i].tick;
+      if(deltaTime > threshold) {
+        lastPoint = this.path[i].point;
+        break;
+      }
     }
-    else {
-        this.speed.setXY(0, 0);
+        
+    if(!lastPoint) {
+      lastPoint = this.path[len-1].point;
     }
+        
+    this.speed.vadd(lastPoint, new Vect(-x, -y)).scale(1000/deltaTime);
+  }
+  else {
+    this.speed.setXY(0, 0);
+  }
 }
 
 function Drag($el){
-    this.active = false;
-    this.draggy = new Movable($el);
-    this.draggyToMouse = new Vect(0, 0);
+  this.active = false;
+  this.draggy = new Movable($el);
+  this.draggyToMouse = new Vect(0, 0);
 }
 
 Drag.prototype.start = function(x, y){
-    this.active = true;
-    this.draggy.path = [];
-    this.draggyToMouse.setXY(this.draggy.el.offset().left - x, this.draggy.el.offset().top - y);
+  this.active = true;
+  this.draggy.path = [];
+  this.draggyToMouse.setXY(this.draggy.el.offset().left - x, this.draggy.el.offset().top - y);
 }
 
 Drag.prototype.move = function(x, y){
-    if (this.active) {
-        this.draggy.move(x + this.draggyToMouse.x, y + this.draggyToMouse.y);
-    }
+  if (this.active) {
+    this.draggy.move(x + this.draggyToMouse.x, y + this.draggyToMouse.y);
+  }
 }
 
 Drag.prototype.stop = function(x, y){
-    this.active = false;
-    this.draggy.speedMeasure(x + this.draggyToMouse.x, y + this.draggyToMouse.y, new Date().getTime());
+  this.active = false;
+  this.draggy.speedMeasure(x + this.draggyToMouse.x, y + this.draggyToMouse.y, new Date().getTime());
 }
 
 $(document).ready(function(){
